@@ -1,0 +1,87 @@
+<head> 
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+<title>Mapa</title> 
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script> 
+<link href="http://api.tiles.mapbox.com/mapbox.js/v1.5.0/mapbox.css" media="screen, print" rel="stylesheet"> 
+<script src="http://api.tiles.mapbox.com/mapbox.js/v1.5.0/mapbox.js"></script> 
+<style type="text/css"> 
+/* paste CSS below this line */ 
+ #map {
+width:400px;
+height:400px;
+}
+</style> 
+</head> 
+<body> 
+<!-- paste HTML below this line --> 
+<div id="map"></div>
+
+  
+<script type="text/javascript"> 
+// paste JavaScript below this line 
+ // 1817 map attribution
+var attribution_1817 = 'Map image from <a href="http://nypl.org">NYPL</a>';
+ 
+// 1817 tile set with attribution
+var nyc_1817 = L.tileLayer( 'http://maps.nypl.org/warper/maps/tile/15128/{z}/{x}/{y}.png' , { attribution: attribution_1817 } );
+ 
+// 2014 tile set attribution
+var attribution_2014 = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, Imagery © <a href="http://mapbox.com">Mapbox</a>';
+ 
+// 2014 tile set using MapBox ID (replace with your own)
+var nyc_2014 = L.tileLayer( 'https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png',{id: 'examples.map-20v6611k',attribution: attribution_2014});
+ 
+// create the map with the default the tileset
+var map = L.map('map', {layers:nyc_1817});
+ 
+// create a variable to hold all tile sets and name them so we can use it for the toggler
+var baseMaps = {
+"NYC 2014": nyc_2014,
+"NYC 1817": nyc_1817
+};
+ 
+ 
+ 
+// the geojson as it comes from the text document
+var geostring = '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"Name":"Josiah R. Brady","Address":"18 Jay Street","Page":35},"geometry":{"type":"Point","coordinates":[-74.009951,40.717956]}},{"type":"Feature","properties":{"Name":"Samuel Clark","Address":"Elm Street, corner of Grand","Page":59},"geometry":{"type":"Point","coordinates":[-73.99908,40.720034]}},{"type":"Feature","properties":{"Name":"John McComb","Address":"Bowery Hill","Page":195},"geometry":{"type":"Point","coordinates":[-73.989072,40.730697]}},{"type":"Feature","properties":{"Name":"Edward Probyn","Address":"12 Vandewater Street","Page":251},"geometry":{"type":"Point","coordinates":[-74.001551,40.710934]}},{"type":"Feature","properties":{"Name":"Ezra Weeks","Address":"16 Harison Street","Page":337},"geometry":{"type":"Point","coordinates":[-74.00971,40.718756]}}]}';
+ 
+// parse the geojson string to a proper json structure
+var geodata = JSON.parse(geostring);
+ 
+// now make it understandable by leaflet
+// now make it understandable by leaflet
+var geolayer = L.geoJson(geodata, {onEachFeature: showPopup});
+ 
+// add the points to the map
+geolayer.addTo(map);
+
+// a data layers variable for the toggler
+var overlays = {
+"Architects": geolayer
+} 
+
+// add the tile set switcher control
+L.control.layers(baseMaps).addTo(map);
+
+// zoom the map to the bounds of the points
+map.fitBounds(geolayer.getBounds()); 
+
+function showPopup(feature, layer) {
+var key, val;
+var content = [];
+for (key in feature.properties) {
+val = feature.properties[key];
+if (key == "Page") {
+val = '<a href="https://archive.org/stream/longworthsameric1813newy#page/' + val + '" target="_blank">See page</a>';
+} else if (key == "Photo") {
+val = '<img src="' + val + '" height="150" />';
+}
+content.push("<strong>" + key + ":</strong> " + val);
+}
+layer.bindPopup(content.join("<br />"));
+}
+</script> 
+</body> 
+</html> 
+
